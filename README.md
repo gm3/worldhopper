@@ -2,11 +2,15 @@
 Example of CSV you need to put in the root directory
 
 ```csv
-1.jpg,https://www.example.com/page1.html
-2.jpg,https://www.example.com/page2.html
-3.jpg,https://www.example.com/page3.html
-4.jpg,https://www.example.com/page4.html
-5.jpg,https://www.example.com/page5.html
+"1.jpeg","https://www.example.com/images/1.jpeg", "Description of this link"
+"2.jpeg","https://www.example.com/images/2.jpeg", "Description of this link"
+"3.jpeg","https://www.example.com/images/3.jpeg", "Description of this link"
+"4.jpeg","https://www.example.com/images/4.jpeg", "Description of this link"
+"5.jpeg","https://www.example.com/images/5.jpeg", "Description of this link"
+"6.jpeg","https://www.example.com/images/6.jpeg", "Description of this link"
+"7.jpeg","https://www.example.com/images/7.jpeg", "Description of this link"
+"8.jpeg","https://www.example.com/images/8.jpeg", "Description of this link"
+"9.jpeg","https://www.example.com/images/9.jpeg", "Description of this link"
 ```
 
 # worldhopper Scripts
