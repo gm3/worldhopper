@@ -31,6 +31,7 @@
     const spiralRadius = 10;
     const spiralHeight = 10;
     const geometry = new THREE.PlaneGeometry(planeSize, planeHeight);
+    THREE.BufferGeometryUtils.triangulateQuads(geometry);
 
     const material = new THREE.MeshPhongMaterial({color: 0xffffff});
     const spiral = new THREE.Object3D();
