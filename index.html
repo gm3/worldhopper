@@ -3,186 +3,57 @@
 <head>
   <meta charset="utf-8">
   <title>Worldhopper</title>
+  <link rel="stylesheet" href="style.css">
   <meta http-equiv="Permissions-Policy" content="interest-cohort=()"/>
   <style>
-    #canvas {
-      width: 100%;
-      height: 100%;
+    body {
       margin: 0;
-      padding: 0;
+      overflow: hidden;
     }
+    #ui {
+      position: absolute;
+      z-index: 1;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.7);
+      top: 10px;
+      left: 10px;
+    }
+    #canvas {
+      display: block;
+    }
+    .modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid #ccc;
+  padding: 10px;
+  z-index: 9999;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  pointer-events: none;
+}
+}
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script>
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({canvas: document.getElementById("canvas")});
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.position.z = 20;
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
+  <div id="ui">
+    <label>Plane Size: <span id="planeSizeValue">1</span></label>
+    <input type="range" min="0" max="10" step="0.1" value="1" id="planeSizeSlider">
+    <label>Plane Height: <span id="planeHeightValue">1</span></label>
+    <input type="range" min="0" max="10" step="0.1" value="1" id="planeHeightSlider">
+    <label>Spiral Radius: <span id="spiralRadiusValue">10</span></label>
+    <input type="range" min="0" max="100" step="1" value="10" id="spiralRadiusSlider">
+    <label>Spiral Height: <span id="spiralHeightValue">10</span></label>
+    <input type="range" min="0" max="100" step="1" value="10" id="spiralHeightSlider">
+  </div>
 
-    THREE.BufferGeometryUtils.triangulateQuads = function (geometry) {
-  var index = geometry.index;
-  var attributes = geometry.attributes;
+  <script type="module" src="/main.js"></script>
+  <div id="main"><canvas id="canvas"></canvas></div>
+  
 
-  if (index === null) {
-    var indices = [];
-
-    for (var i = 0; i < attributes.position.count; i += 4) {
-      indices.push(i, i + 1, i + 2, i + 2, i + 1, i + 3);
-    }
-
-    geometry.setIndex(indices);
-  } else {
-    var indices = index.array;
-    var vertices = attributes.position.array;
-
-    var newIndices = [];
-
-    for (var i = 0; i < indices.length; i += 4) {
-      var i1 = indices[i] * 3;
-      var i2 = indices[i + 1] * 3;
-      var i3 = indices[i + 2] * 3;
-      var i4 = indices[i + 3] * 3;
-
-      var v1x = vertices[i1];
-      var v1y = vertices[i1 + 1];
-      var v1z = vertices[i1 + 2];
-
-      var v2x = vertices[i2];
-      var v2y = vertices[i2 + 1];
-      var v2z = vertices[i2 + 2];
-
-      var v3x = vertices[i3];
-      var v3y = vertices[i3 + 1];
-      var v3z = vertices[i3 + 2];
-
-      var v4x = vertices[i4];
-      var v4y = vertices[i4 + 1];
-      var v4z = vertices[i4 + 2];
-
-      var n = i / 4 * 6;
-
-      newIndices[n] = indices[i];
-      newIndices[n + 1] = indices[i + 1];
-      newIndices[n + 2] = indices[i + 2];
-      newIndices[n + 3] = indices[i + 2];
-      newIndices[n + 4] = indices[i + 1];
-      newIndices[n + 5] = indices[i + 3];
-    }
-
-    geometry.setIndex(newIndices);
-  }
-
-  geometry.clearGroups();
-};
-
-
-    const planeSize = 2;
-    const planeHeight = 1;
-    const spiralRadius = 10;
-    const spiralHeight = 10;
-    const geometry = new THREE.PlaneGeometry(planeSize, planeHeight);
-    THREE.BufferGeometryUtils.triangulateQuads(geometry);
-
-    const material = new THREE.MeshPhongMaterial({color: 0xffffff});
-    const spiral = new THREE.Object3D();
-
-    const light = new THREE.PointLight(0xffffff, 1, 100);
-    light.position.set(10, 10, 10);
-    scene.add(light);
-
-    fetch("links.csv")
-      .then(response => response.text())
-      .then(data => {
-        const rows = data.split("\n");
-        const numPlanes = rows.length;
-        const promises = [];
-
-        for (let i = 0; i < rows.length; i++) {
-          const cols = rows[i].split(",");
-          if (cols.length >= 2) {
-            const promise = new Promise((resolve, reject) => {
-              const img = new Image();
-              img.onload = () => resolve(img);
-              img.onerror = reject;
-              img.src = `images/${cols[0].trim()}`;
-            });
-            promises.push(promise);
-          }
-        }
-
-        Promise.all(promises).then(images => {
-          for (let i = 0; i < rows.length; i++) {
-            const cols = rows[i].split(",");
-            if (cols.length >= 2) {
-              const img = images.shift();
-              const texture = new THREE.Texture(img);
-              texture.needsUpdate = true;
-
-              const planeWithImage = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({map: texture}));
-              const t = i / numPlanes * Math.PI * 2;
-              const x = Math.cos(t) * i / numPlanes * spiralRadius;
-              const y = i / numPlanes * spiralHeight;
-              const z = Math.sin(t) * i / numPlanes * spiralRadius;
-              planeWithImage.position.set(x, y, z);
-              planeWithImage.lookAt(new THREE.Vector3());
-              planeWithImage.name = `Plane ${i+1}`;
-              planeWithImage.userData = { url: cols[1].trim() }; // Store the URL in the userData property
-              spiral.add(planeWithImage);
-            }
-          }
-          scene.add(spiral);
-        }).catch(error => console.log(error));
-      });
-
-      geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array([
-  0, 1,
-  1, 1,
-  0, 0,
-  1, 1,
-  1, 0,
-  0, 0,
-]), 2));
-
-function onDocumentMouseDown(event) {
-  event.preventDefault();
-
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-
-  const intersects = raycaster.intersectObjects(spiral.children);
-
-  if (intersects.length > 0) {
-    const firstIntersect = intersects[0];
-    if (firstIntersect.object.userData.url) {
-      window.open(firstIntersect.object.userData.url, '_blank');
-    }
-  }
-}
-
-document.addEventListener('mousedown', onDocumentMouseDown, false);
-
-const animate = function () {
-  requestAnimationFrame(animate);
-  spiral.rotation.y += 0.005;
-  renderer.render(scene, camera);
-};
-
-animate();
-
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-  </script>
 </body>
 </html>
