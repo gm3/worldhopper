@@ -6,6 +6,6 @@
     "vite": "^4.3.1"
   },
   "scripts": {
-    "build": "vite build"
+    "build": "npm run build"
   }
 }
