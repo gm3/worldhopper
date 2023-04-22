@@ -18,7 +18,7 @@ const scene = new THREE.Scene();
     let planeHeight = 1;
     let numSpirals = 2;
     let spiralRadius = 10;
-    let spiralHeight = 10 * numSpirals;
+    let spiralHeight = 10;
     let spiralSpeed = .0001;
     let geometry = new THREE.PlaneGeometry(planeSize, planeHeight);
 
@@ -65,7 +65,7 @@ const scene = new THREE.Scene();
           const planeWithImage = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide }));
           const t = i / numPlanes * Math.PI * 2;
           const x = Math.cos(t) * i / numPlanes * spiralRadius;
-          const y = (i % numPlanes) / numPlanes * spiralHeight + Math.floor(i / numPlanes) * spiralHeight * numSpirals;
+          const y = (i % numPlanes) / numPlanes * spiralHeight + Math.floor(i / numPlanes);
 
           const z = Math.sin(t) * i / numPlanes * spiralRadius;
           planeWithImage.position.set(x, y, z);
